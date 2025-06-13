@@ -3,25 +3,32 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 
-# Загружаем переменные окружения
+# Загружаем переменные окружения (.env на локалке, на Render из панели)
 load_dotenv()
 
 app = Flask(__name__)
 
-# Включаем CORS только для своего фронта (или "*" если нужно временно открыть для всех)
-CORS(app, origins=["https://codeova.ai", "https://www.codeova.ai"])
+# Настроить CORS — разрешить твоему фронту обращаться к API
+CORS(app, origins=[
+    "https://codeova.ai",  # твой фронт, меняй под себя!
+    "http://localhost:3000"
+])
 
-# Получаем переменные окружения
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 API_PROXY_TOKEN = os.getenv("API_PROXY_TOKEN")
 
 @app.route("/api/chat", methods=["POST"])
 def chat():
-    # Проверка токена
+    # Проверка токена для безопасности
     if request.headers.get('X-API-TOKEN') != API_PROXY_TOKEN:
         return jsonify({"error": "Unauthorized"}), 401
-    # Тут твоя логика общения с OpenAI (заглушка для проверки)
+    # Здесь твоя логика общения с OpenAI и т.д.
     return jsonify({"result": "API connected!"})
 
-# Ключевая строка для WSGI серверов (Render)
+# Основная точка входа для Render и локального запуска
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))  # Render выдаёт PORT
+    app.run(host="0.0.0.0", port=port)
+
+# Для WSGI-серверов (Render это нужно)
 application = app
