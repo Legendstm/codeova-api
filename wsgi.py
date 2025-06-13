@@ -1,16 +1,27 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
+from dotenv import load_dotenv
 import os
+
+# Загружаем переменные окружения
+load_dotenv()
 
 app = Flask(__name__)
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "none")
-API_PROXY_TOKEN = os.getenv("API_PROXY_TOKEN", "none")
+# Включаем CORS только для своего фронта (или "*" если нужно временно открыть для всех)
+CORS(app, origins=["https://codeova.ai", "https://www.codeova.ai"])
+
+# Получаем переменные окружения
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+API_PROXY_TOKEN = os.getenv("API_PROXY_TOKEN")
 
 @app.route("/api/chat", methods=["POST"])
 def chat():
+    # Проверка токена
     if request.headers.get('X-API-TOKEN') != API_PROXY_TOKEN:
         return jsonify({"error": "Unauthorized"}), 401
+    # Тут твоя логика общения с OpenAI (заглушка для проверки)
     return jsonify({"result": "API connected!"})
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+# Ключевая строка для WSGI серверов (Render)
+application = app
